@@ -10,6 +10,7 @@ module Example =
     open TinyMaude.ReductionEngine
     open Result
     open FSharp.Core
+    open TinyMaude.AST
 
 
     let natModuleInput =
@@ -46,7 +47,7 @@ module Example =
             let! natMod = readModule natModuleInput
             let! term1 = run pTerm term |> toResult
             let (r, c) = reduce natMod term1
-            return r |> AST.termToString
+            return r |> Term.toString
         } |> Result.defaultWith (fun _ -> "")
 
     [<Fact>]

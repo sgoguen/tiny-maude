@@ -127,9 +127,9 @@ module Parser =
                     |> Map.ofList
 
                 { name = name
-                  sort = mSort
-                  variables = mVar
-                  operators = mOp })
+                  sort = Sorts(mSort)
+                  variables = Vars(mVar)
+                  operators = Ops(mOp) })
 
     let toResult (r: ParserResult<_, _>) =
         match r with
