@@ -51,10 +51,16 @@ module Example =
 
     [<Fact>]
     let ``M + M = M + M`` () =
-        let result = evalNatTerm "p (M, M)"
+        let result = evalNatTerm "p(M, M)"
         // This is failing, the resulting is coming back M
-        Assert.Equal("p (M, M)", result)
+        Assert.Equal("p(M, M)", result)
     
+    [<Fact>]
+    let ``sq(M) = M * M`` () =
+        let result = evalNatTerm "sq(M)"
+        // This is failing, the resulting is coming back M
+        Assert.Equal("m(M, M)", result)
+
     [<Fact>]
     let ``3 + 3 = 6`` () =
         let result = evalNatTerm "p ( s (s (s z)), s (s (s z)))"

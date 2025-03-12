@@ -17,18 +17,20 @@ module ReductionEngine =
     // isMatch returns true if either t or u represents a variable (looked up in the module)
     // or if they are compound terms with the same number of arguments and all children match.
     let rec isMatch (cmd: Command) (t: Term) (u: Term) : bool =
-        let varOr =
-            (Map.containsKey t.op cmd.forModule.variables)
-            || (Map.containsKey u.op cmd.forModule.variables)
-
-        let ta = t.args
-        let ua = u.args
-
-        let childMatch =
-            (List.length ta = List.length ua)
-            && (List.forall2 (fun a b -> isMatch cmd a b) ta ua)
-
-        varOr || childMatch
+        // Check if u (the pattern) contains a variable
+        let patternIsVar = Map.containsKey u.op cmd.forModule.variables
+        
+        // If the pattern is a variable, it can match anything
+        if patternIsVar then
+            true
+        // If the pattern isn't a variable but the subject term is, don't match
+        elif Map.containsKey t.op cmd.forModule.variables then
+            t.op = u.op // Only match if they are the exact same variable
+        // Otherwise, both are non-variables, match if operators match and all args match
+        else
+            t.op = u.op &&
+            List.length t.args = List.length u.args &&
+            List.forall2 (fun a b -> isMatch cmd a b) t.args u.args
 
     // makeBindMap builds a binding from a pattern term (l) to a term (t)
     // If l is a variable (i.e. found in the module’s variable map), then return a singleton map;
