@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Results.fs" /><Compile Include="AST.fs" /><Compile Include="Parser.fs" /><Compile Include="Reduction.fs" />
+    <Compile Include="Results.fs" /><Compile Include="State.fs" /><Compile Include="AST.fs" /><Compile Include="Parser.fs" /><Compile Include="Reduction.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
 

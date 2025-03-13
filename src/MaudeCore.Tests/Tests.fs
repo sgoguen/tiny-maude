@@ -48,14 +48,24 @@ module Example =
             let! term1 = run pTerm term |> toResult
             let (r, c) = reduce natMod term1
             return r |> Term.toString
-        } |> Result.defaultWith (fun _ -> "")
+        }
+        |> Result.defaultWith (fun _ -> "")
+
+    let traceTerm (term: string) =
+        result {
+            let! natMod = readModule natModuleInput
+            let! term1 = run pTerm term |> toResult
+            let (r, c) = reduce natMod term1
+            return (r |> Term.toString, c.trace |> List.map Term.toString |> List.rev)
+        }
+        |> Result.defaultWith (fun _ -> "", [])
 
     [<Fact>]
     let ``M + M = M + M`` () =
         let result = evalNatTerm "p(M, M)"
         // This is failing, the resulting is coming back M
         Assert.Equal("p(M, M)", result)
-    
+
     [<Fact>]
     let ``sq(M) = M * M`` () =
         let result = evalNatTerm "sq(M)"
@@ -65,12 +75,12 @@ module Example =
     [<Fact>]
     let ``3 + 3 = 6`` () =
         let result = evalNatTerm "p ( s (s (s z)), s (s (s z)))"
-        Assert.Equal("s(s(s(s(s(s(z))))))", result)
+        Assert.Equal("s s s s s s z", result)
 
     [<Fact>]
     let ``3 * 3 = 9`` () =
         let result = evalNatTerm "m ( s (s (s z)), s (s (s z)))"
-        Assert.Equal("s(s(s(s(s(s(s(s(s(z)))))))))", result)
+        Assert.Equal("s s s s s s s s s z", result)
 
     [<Fact>]
     let ``(3 * 3) ^ 2 = 81`` () =
@@ -78,3 +88,22 @@ module Example =
         let count = result |> Seq.filter (fun c -> c = 's') |> Seq.length
         Assert.Equal(81, count)
 
+
+    [<Fact>]
+    let ``Trace 2 * 2`` () =
+        let (result: string, trace: string list) = traceTerm "m (s s z, s s z)"
+        let rewriteCount = trace.Length
+        Assert.Equal("s s s s z", result)
+
+        let expectedTrace =
+            [ "p(s s z, m(s s z, s z))"
+              "s s z"
+              "p(s s z, s s z)"
+              "s p(s s z, s z)"
+              "s p(s s z, z)"
+              "s s z"
+              "s s s z"
+              "s s s s z" ]
+
+        Assert.Equal<string>(expectedTrace, trace)
+        Assert.Equal(8, rewriteCount)

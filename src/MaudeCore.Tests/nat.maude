@@ -24,10 +24,51 @@ fmod NAT is
     eq sq (M) = m (M, M) .
 endfm
 
-reduce p (M, M) . 
+set trace on .
+
+--- reduce p (M, M) . 
 --- result Nat: p(M, M)
 
-reduce p ( s (s (s z)), s (s (s z))) . 
+--- reduce p ( s (s (s z)), s (s (s z))) . 
 --- result Nat: s s s s s s z
+
+reduce m ( s s z, s s z) .
+
+--- reduce in NAT : m(s s z, s s z) .
+--- *********** equation
+--- eq m(N, s M) = p(N, m(N, M)) .
+--- N --> s s z
+--- M --> s z
+--- m(s s z, s s z)
+--- --->
+--- p(s s z, m(s s z, s z))
+--- *********** equation
+--- eq m(N, s z) = N .
+--- N --> s s z
+--- m(s s z, s z)
+--- --->
+--- s s z
+--- *********** equation
+--- eq p(N, s M) = s p(N, M) .
+--- N --> s s z
+--- M --> s z
+--- p(s s z, s s z)
+--- --->
+--- s p(s s z, s z)
+--- *********** equation
+--- eq p(N, s M) = s p(N, M) .
+--- N --> s s z
+--- M --> z
+--- p(s s z, s z)
+--- --->
+--- s p(s s z, z)
+--- *********** equation
+--- eq p(N, z) = N .
+--- N --> s s z
+--- p(s s z, z)
+--- --->
+--- s s z
+--- rewrites: 5 in 0ms cpu (0ms real) (128205 rewrites/second)
+--- result Nat: s s s s z
 
 quit
