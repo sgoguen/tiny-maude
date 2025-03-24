@@ -56,7 +56,8 @@ module Example =
             let! natMod = readModule natModuleInput
             let! term1 = run pTerm term |> toResult
             let (r, c) = reduce natMod term1
-            return (r |> Term.toString, c.trace |> List.map Term.toString |> List.rev)
+            // No need to reverse the trace anymore
+            return (r |> Term.toString, c.trace |> List.map Term.toString)
         }
         |> Result.defaultWith (fun _ -> "", [])
 
@@ -96,7 +97,8 @@ module Example =
         Assert.Equal("s s s s z", result)
 
         let expectedTrace =
-            [ "p(s s z, m(s s z, s z))"
+            [ "m(s s z, s s z)"
+              "p(s s z, m(s s z, s z))"
               "s s z"
               "p(s s z, s s z)"
               "s p(s s z, s z)"
@@ -106,4 +108,4 @@ module Example =
               "s s s s z" ]
 
         Assert.Equal<string>(expectedTrace, trace)
-        Assert.Equal(8, rewriteCount)
+        Assert.Equal(9, rewriteCount)  // Updated count to include initial term

@@ -16,21 +16,22 @@ module ReductionEngine =
             /// The module containing equations for rewriting
             activeModule: Module
 
-            /// Log of terms produced during reduction (newest first)
+            /// Log of terms produced during reduction (in chronological order)
             trace: Term list
         }
 
         /// Add a term to the reduction trace
-        member this.AddTrace(t: Term) = { this with trace = t :: this.trace }
+        member this.AddTrace(t: Term) = { this with trace = this.trace @ [t] }
 
         /// Create an initial reduction state
         static member Create(m: Module) = { activeModule = m; trace = [] }
 
     /// The core rewriting function that applies equations to reduce a term
     let rewrite (state: ReductionState) (t: Term) : Term * ReductionState =
-
+        // Add the initial term to trace
+        let state = state.AddTrace t
+        
         let rec rewriteLoop state t =
-
             let m = state.activeModule
 
             match m.matchingEquals t with
