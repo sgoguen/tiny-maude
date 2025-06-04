@@ -54,17 +54,29 @@ module AST =
             Map.containsKey t.op variables
 
         member this.IsMatch(t: Term, u: Term) : bool =
-            // If the pattern is a variable, it can match anything
-            if this.IsVar u then
-                true
-            // If the pattern isn't a variable but the subject term is, don't match
-            elif this.IsVar t then
-                t.op = u.op // Only match if they are the exact same variable
-            // Otherwise, both are non-variables, match if operators match and all args match
-            else
-                t.op = u.op
-                && List.length t.args = List.length u.args
-                && List.forall2 (fun a b -> this.IsMatch(a, b)) t.args u.args
+            // Extended matching that ensures repeated variables are bound to the
+            // same term. We accumulate bindings as we recurse and fail if a
+            // variable is encountered with a different value than previously
+            // bound.
+            let rec matchWithBindings bindings t u =
+                if this.IsVar u then
+                    match Map.tryFind u.op bindings with
+                    | None -> Some(Map.add u.op t bindings)
+                    | Some existing -> if existing = t then Some bindings else None
+                elif this.IsVar t then
+                    if t.op = u.op then Some bindings else None
+                else if t.op = u.op && List.length t.args = List.length u.args then
+                    (bindings, List.zip t.args u.args)
+                    ||> List.fold (fun acc (ta, ua) ->
+                        match acc with
+                        | None -> None
+                        | Some b -> matchWithBindings b ta ua)
+                else
+                    None
+
+            match matchWithBindings Map.empty t u with
+            | Some _ -> true
+            | None -> false
 
         member this.MakeMapBind(t: Term, l: Term) =
             let rec makeBindMap (variables: Variables) (t: Term) (l: Term) : Map<Term, Term> =
